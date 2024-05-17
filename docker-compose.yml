@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  postgres:
+    image: 'postgres:16-alpine'
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: 'bookstore'
+      POSTGRES_USER: 'bookstore_user'
+      POSTGRES_PASSWORD: 'bookstore_user'

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: bookstore
+
+  # Obtain datasource settings from the active profile.
+  datasource:
+    url: ${database.url}
+    username: ${database.username}
+    password: ${database.password}
+
+  # By default, use the local profile for development.
+  profiles:
+    active: local

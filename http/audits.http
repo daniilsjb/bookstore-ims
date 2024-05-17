@@ -1,0 +1,32 @@
+### Authenticate
+POST http://localhost:8080/api/v1/auth/authenticate
+Content-Type: application/json
+
+{
+  "username": "POS #001",
+  "password": "password"
+}
+
+### Create an audit
+POST http://localhost:8080/api/v1/audits
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJQT1MgIzAwMSIsImlhdCI6MTcxNTI2ODgxNywiZXhwIjoxNzE1MzU1MjE3fQ.vhUT_u0Pc7ZjU70ltMxCWvmVWw4j2YuDbDeeaYAdJjfPdrkx2463O1qxN3NgYnCA
+
+{
+  "type": "SUPPLY",
+  "comment": "This is just a test audit!",
+  "entries": [
+    {
+      "isbn": "0-312-85767-5",
+      "quantity": 5
+    },
+    {
+      "isbn": "978-0-7653-2595-2",
+      "quantity": 10
+    },
+    {
+      "isbn": "0-312-86459-0",
+      "quantity": 15
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+database:
+  url: 'jdbc:postgresql://localhost:5432/bookstore'
+  username: 'bookstore_user'
+  password: 'bookstore_user'
+
+application:
+  security:
+    jwt:
+      secret-key: '5DEC8CB28ED6CDCD6EBD024B4C157FB7FAF924B1141F86B3614A1665C215670E'
+      expiration: 86400000
+
+spring:
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+  sql:
+    init:
+      mode: always
+
+server:
+  port: ${PORT:8080}
+
+vaadin:
+  launch-browser: true
+  exclude-urls: '/api/**'
+  allowed-packages: 'com.vaadin,org.vaadin,dev.hilla,lv.tsi.bookstore'
