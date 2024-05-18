@@ -1,5 +1,5 @@
 ### Authenticate
-POST http://localhost:8080/api/v1/auth/authenticate
+POST {{bookstore-host}}/auth/authenticate
 Content-Type: application/json
 
 {
@@ -7,14 +7,19 @@ Content-Type: application/json
   "password": "password"
 }
 
-### Create an audit
-POST http://localhost:8080/api/v1/audits
+> {%
+  if (response.status == 200) {
+    client.global.set("accessToken", response.body.accessToken);
+  }
+%}
+
+### Create a new audit
+POST {{bookstore-host}}/api/v1/audits
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJQT1MgIzAwMSIsImlhdCI6MTcxNTI2ODgxNywiZXhwIjoxNzE1MzU1MjE3fQ.vhUT_u0Pc7ZjU70ltMxCWvmVWw4j2YuDbDeeaYAdJjfPdrkx2463O1qxN3NgYnCA
+Authorization: Bearer {{accessToken}}
 
 {
   "type": "SUPPLY",
-  "comment": "This is just a test audit!",
   "entries": [
     {
       "isbn": "0-312-85767-5",
