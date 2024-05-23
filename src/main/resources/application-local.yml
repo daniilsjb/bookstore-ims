@@ -18,10 +18,5 @@ spring:
     init:
       mode: always
 
-server:
-  port: ${PORT:8080}
-
 vaadin:
-  launch-browser: true
   exclude-urls: '/api/**'
-  allowed-packages: 'com.vaadin,org.vaadin,dev.hilla,lv.tsi.bookstore'

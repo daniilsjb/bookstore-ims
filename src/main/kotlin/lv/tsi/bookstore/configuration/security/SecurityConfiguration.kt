@@ -1,7 +1,7 @@
 package lv.tsi.bookstore.configuration.security
 
 import com.vaadin.flow.spring.security.VaadinWebSecurity
-import lv.tsi.bookstore.feature.security.LoginView
+import lv.tsi.bookstore.feature.login.LoginView
 import lv.tsi.bookstore.feature.user.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

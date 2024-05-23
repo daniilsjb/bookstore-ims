@@ -26,14 +26,13 @@ import com.vaadin.flow.shared.Registration
 import com.vaadin.flow.theme.lumo.LumoUtility
 import jakarta.annotation.security.PermitAll
 import lv.tsi.bookstore.common.MainLayout
-import lv.tsi.bookstore.common.extensions.toCapitalCase
 import lv.tsi.bookstore.feature.book.Book
 import lv.tsi.bookstore.feature.book.BookService
 import lv.tsi.bookstore.feature.user.User
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-data class AuditRowData(
+private data class AuditRowData(
     val id: Long,
     val book: Book,
     val quantity: Int,
@@ -52,7 +51,7 @@ class AuditView(
 
     private val typePicker = ComboBox<AuditType>().apply {
         setItems(AuditType.entries)
-        setItemLabelGenerator { it.name.toCapitalCase() }
+        setItemLabelGenerator { it.toDisplayName() }
         addValueChangeListener { refreshGrid() }
     }
 
@@ -65,7 +64,7 @@ class AuditView(
         addCloseListener { closeForm() }
         addSaveListener { event ->
             try {
-                auditService.save(event.audit)
+                auditService.create(event.audit)
                 Notification.show("Audit has been added successfully!").also {
                     refreshGrid()
                     closeForm()
@@ -81,8 +80,6 @@ class AuditView(
         setSizeFull()
         setColumns()
 
-        columns.forEach { it.setAutoWidth(true) }
-
         addColumn("id")
             .setSortable(true)
             .setHeader("Audit")
@@ -95,7 +92,7 @@ class AuditView(
             .setSortable(true)
             .setHeader("Time")
 
-        addColumn { it.type.name.toCapitalCase() }
+        addColumn { it.type.toDisplayName() }
             .setSortable(true)
             .setHeader("Type")
 
@@ -121,6 +118,8 @@ class AuditView(
         addColumn { it.createdBy?.username }
             .setSortable(true)
             .setHeader("Created By")
+
+        columns.forEach { it.setAutoWidth(true) }
     }
 
     init {
@@ -183,7 +182,7 @@ private class AuditForm(books: List<Book>) : FormLayout() {
     private val binder = BeanValidationBinder(Audit::class.java)
     private val type = ComboBox<AuditType>("Type").apply {
         setItems(AuditType.entries)
-        setItemLabelGenerator { it.name.toCapitalCase() }
+        setItemLabelGenerator { it.toDisplayName() }
     }
 
     private val entries = mutableListOf<AuditEntry>()
@@ -283,7 +282,7 @@ private class AuditForm(books: List<Book>) : FormLayout() {
         binder.bean = Audit()
         entries.clear()
         entriesLayout.removeAll()
-        isEnabled = false
+        save.isEnabled = false
     }
 
     fun addSaveListener(listener: ComponentEventListener<SaveEvent>): Registration {

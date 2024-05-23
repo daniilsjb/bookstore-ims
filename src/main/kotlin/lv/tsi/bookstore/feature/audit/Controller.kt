@@ -12,15 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-data class CreateAuditRequest(
+data class AuditRequest(
     @field:NotNull(message = "Type must be specified")
     val type: AuditType,
 
     @field:Size(min = 1, message = "At least one entry must be specified")
-    val entries: List<CreateAuditRequestEntry>,
+    val entries: List<AuditRequestEntry>,
 )
 
-data class CreateAuditRequestEntry(
+data class AuditRequestEntry(
     @field:ISBN(message = "Invalid ISBN")
     @field:NotNull(message = "ISBN must be specified")
     val isbn: String,
@@ -38,7 +38,7 @@ class AuditController(
 ) {
 
     @PostMapping
-    fun create(@RequestBody @Valid request: CreateAuditRequest) {
+    fun create(@RequestBody @Valid request: AuditRequest) {
         val audit = Audit(type = request.type)
         val entries = request.entries.map { entry ->
             val book = bookService.findByISBN(entry.isbn) ?: throw NoSuchBookException(entry.isbn)
@@ -46,6 +46,6 @@ class AuditController(
         }
 
         audit.entries.addAll(entries)
-        auditService.save(audit)
+        auditService.create(audit)
     }
 }

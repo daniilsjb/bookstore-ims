@@ -1,4 +1,4 @@
-package lv.tsi.bookstore.feature.security
+package lv.tsi.bookstore.feature.login
 
 import com.vaadin.flow.spring.security.AuthenticationContext
 import lv.tsi.bookstore.feature.user.User
@@ -7,24 +7,24 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 
 @Component
-class SecurityService(
-    private val authenticationContext: AuthenticationContext,
+class DefaultSecurityService(
+    private val context: AuthenticationContext,
     private val userService: UserService,
-) {
+) : SecurityService {
 
-    fun getAuthenticatedUserDetails(): UserDetails {
-        return authenticationContext
+    override fun getAuthenticatedUserDetails(): UserDetails {
+        return context
             .getAuthenticatedUser(UserDetails::class.java)
             .get()
     }
 
-    fun getAuthenticatedUser(): User {
+    override fun getAuthenticatedUser(): User {
         val username = getAuthenticatedUserDetails().username
         return userService.findByUsername(username)
             ?: error("Authenticated user was not found in the database.")
     }
 
-    fun logout() {
-        authenticationContext.logout()
+    override fun logout() {
+        context.logout()
     }
 }

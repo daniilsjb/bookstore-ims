@@ -28,8 +28,9 @@ import com.vaadin.flow.shared.Registration
 import com.vaadin.flow.theme.lumo.LumoUtility
 import jakarta.annotation.security.PermitAll
 import lv.tsi.bookstore.common.MainLayout
-import lv.tsi.bookstore.feature.security.SecurityService
-import lv.tsi.bookstore.feature.user.isManager
+import lv.tsi.bookstore.feature.login.SecurityService
+import lv.tsi.bookstore.feature.user.Role
+import lv.tsi.bookstore.feature.user.hasRole
 
 @PermitAll
 @Route(value = "books", layout = MainLayout::class)
@@ -49,9 +50,6 @@ class BookView(
 
     private val grid = Grid(Book::class.java).apply {
         setSizeFull()
-
-        // Ensure that columns take up necessary width even on small screens.
-        columns.forEach { it.setAutoWidth(true) }
 
         // Ensure that only managers can edit books.
         if (hasManagerAccess) {
@@ -78,6 +76,8 @@ class BookView(
 
         addColumns("basePrice")
         getColumnByKey("basePrice").setTextAlign(ColumnTextAlign.CENTER)
+
+        columns.forEach { it.setAutoWidth(true) }
     }
 
     private val form = BookForm(
@@ -99,7 +99,7 @@ class BookView(
 
                 Notification.show("Book '${book.title}' has been added successfully!")
             } catch (e: DuplicateBookException) {
-                setDuplicateError("This ISBN is already taken")
+                setIdentifierError("This ISBN is already taken")
             }
         }
 
@@ -124,7 +124,9 @@ class BookView(
 
 
     private val hasManagerAccess: Boolean
-        get() = securityService.getAuthenticatedUserDetails().isManager()
+        get() = securityService
+            .getAuthenticatedUserDetails()
+            .hasRole(Role.MANAGER)
 
     init {
         setSizeFull()
@@ -262,7 +264,7 @@ private class BookForm(
         add(fullLayout)
     }
 
-    fun setDuplicateError(message: String) {
+    fun setIdentifierError(message: String) {
         isbn.isInvalid = true
         isbn.errorMessage = message
     }

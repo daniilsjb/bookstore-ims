@@ -3,6 +3,7 @@ package lv.tsi.bookstore.feature.user
 import com.vaadin.flow.component.ComponentEvent
 import com.vaadin.flow.component.ComponentEventListener
 import com.vaadin.flow.component.Key
+import com.vaadin.flow.component.Text
 import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.combobox.ComboBox
@@ -24,7 +25,7 @@ import com.vaadin.flow.shared.Registration
 import com.vaadin.flow.theme.lumo.LumoUtility
 import jakarta.annotation.security.RolesAllowed
 import lv.tsi.bookstore.common.MainLayout
-import lv.tsi.bookstore.feature.security.SecurityService
+import lv.tsi.bookstore.feature.login.SecurityService
 
 @RolesAllowed("MANAGER")
 @Route("users", layout = MainLayout::class)
@@ -42,39 +43,46 @@ class UserView(
     }
 
     private val form = UserForm().apply {
-        width = "25em"
+        addSaveListener { onSave(it.user) }
         addCloseListener { closeForm() }
-        addSaveListener { event ->
-            val user = event.user
-            try {
-                userService.create(user)
-                refreshGrid()
-                closeForm()
-                Notification.show("User '${user.username}' has been added successfully!")
-            } catch (e: DuplicateUserException) {
-                Notification.show(e.message)
-            }
+        width = "25em"
+    }
+
+    private fun onSave(user: User) {
+        try {
+            userService.register(user)
+            Notification.show("User '${user.username}' has been added successfully!")
+        } catch (e: DuplicateUserException) {
+            Notification.show(e.message)
+            return
         }
+
+        refreshGrid()
+        closeForm()
     }
 
     private val grid = Grid(User::class.java).apply {
         setSizeFull()
         setColumns("username", "email", "role", "active")
 
-        // Ensure that columns take up necessary width even on small screens.
-        columns.forEach { column -> column.setAutoWidth(true) }
+        // Customize the user role column.
+        getColumnByKey("role").apply {
+            setRenderer(ComponentRenderer { user ->
+                Text(user.role.toDisplayName())
+            })
+        }
 
         // Customize the user status column.
         getColumnByKey("active").apply {
             setHeader("Status")
-            setRenderer(ComponentRenderer { user: User ->
+            setRenderer(ComponentRenderer { user ->
                 Span().apply {
                     if (user.active) {
                         element.setAttribute("theme", "badge success")
                         add("Active")
                     } else {
                         element.setAttribute("theme", "badge error")
-                        add("Locked")
+                        add("Blocked")
                     }
                 }
             })
@@ -91,8 +99,10 @@ class UserView(
 
             // Create a lock-toggling button.
             Button(icon).apply {
-                // Ensure that a user cannot block himself.
-                isEnabled = securityService.getAuthenticatedUserDetails().username != user.username
+                // Ensure that a user cannot self-block.
+                isEnabled = securityService
+                    .getAuthenticatedUserDetails()
+                    .username != user.username
 
                 addThemeVariants(ButtonVariant.LUMO_TERTIARY)
                 addClickListener {
@@ -103,17 +113,21 @@ class UserView(
         }.apply {
             setTextAlign(ColumnTextAlign.END)
         }
+
+        columns.forEach { column ->
+            column.setAutoWidth(true)
+        }
     }
 
     init {
         setSizeFull()
-        refreshGrid()
 
-        val button = Button("Add User") {
+        val addButton = Button("Add User") {
             grid.asSingleSelect().clear()
             openForm(User())
         }
-        add(HorizontalLayout(button, search).apply {
+
+        add(HorizontalLayout(addButton, search).apply {
             setWidthFull()
             expand(search)
         })
@@ -124,6 +138,7 @@ class UserView(
             setFlexGrow(1.0, form)
         })
 
+        refreshGrid()
         closeForm()
     }
 
@@ -147,7 +162,11 @@ private class UserForm : FormLayout() {
     private val username = TextField("Username")
     private val password = TextField("Password")
     private val email = TextField("Email")
-    private val role = ComboBox<Role>("Role").apply { setItems(Role.entries) }
+
+    private val role = ComboBox<Role>("Role").apply {
+        setItems(Role.entries)
+        setItemLabelGenerator { it.toDisplayName() }
+    }
 
     private val save = Button("Save").apply {
         addThemeVariants(ButtonVariant.LUMO_PRIMARY)

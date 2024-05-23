@@ -8,14 +8,22 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 
-enum class Role(val value: String) {
-    EMPLOYEE("ROLE_EMPLOYEE"),
-    MANAGER("ROLE_MANAGER"),
+enum class Role {
+    EMPLOYEE,
+    MANAGER;
+
+    fun toRoleString(): String = "ROLE_$name"
+
+    fun toDisplayName(): String = name
+        .lowercase()
+        .replaceFirstChar { it.uppercaseChar() }
 }
 
 @Entity
@@ -24,18 +32,20 @@ class User(
     @field:Id
     var id: UUID? = null,
 
-    @field:Column(nullable = false)
+    @field:Column(nullable = false, unique = true)
     @field:NotBlank(message = "Username must not be blank")
     private var username: String = "",
 
     @field:Column(nullable = false, length = 60)
     @field:NotBlank(message = "Password must not be blank")
+    @field:Size(max = 60, message = "Password cannot be longer than 60 characters")
     private var password: String = "",
 
     @field:Column(nullable = true)
     @field:Email(message = "Email must have correct format")
-    var email: String = "",
+    var email: String? = null,
 
+    @field:NotNull(message = "Role must be specified")
     @field:Column(nullable = false)
     @field:Enumerated(EnumType.ORDINAL)
     var role: Role = Role.EMPLOYEE,
@@ -43,6 +53,10 @@ class User(
     @field:Column(nullable = false)
     var active: Boolean = true,
 ) : UserDetails {
+
+    fun toggle() {
+        active = !active
+    }
 
     fun setUsername(username: String) {
         this.username = username
@@ -56,8 +70,8 @@ class User(
     override fun getPassword(): String = password
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return mutableListOf(SimpleGrantedAuthority(Role.EMPLOYEE.value))
-            .apply { if (role == Role.MANAGER) add(SimpleGrantedAuthority(Role.MANAGER.value)) }
+        return mutableListOf(SimpleGrantedAuthority(Role.EMPLOYEE.toRoleString()))
+            .apply { if (role == Role.MANAGER) add(SimpleGrantedAuthority(Role.MANAGER.toRoleString())) }
     }
 
     override fun isCredentialsNonExpired(): Boolean = true
@@ -66,14 +80,5 @@ class User(
     override fun isEnabled(): Boolean = true
 }
 
-fun UserDetails.hasRole(role: Role): Boolean {
-    return authorities.any { it.authority == role.value }
-}
-
-fun UserDetails.isEmployee(): Boolean {
-    return this.hasRole(Role.EMPLOYEE)
-}
-
-fun UserDetails.isManager(): Boolean {
-    return this.hasRole(Role.MANAGER)
-}
+fun UserDetails.hasRole(role: Role): Boolean =
+    authorities.any { it.authority == role.toRoleString() }

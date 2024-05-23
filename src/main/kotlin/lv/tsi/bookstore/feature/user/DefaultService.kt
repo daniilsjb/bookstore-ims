@@ -14,10 +14,10 @@ class DefaultUserService(
 ) : UserService {
 
     override fun findAll(searchTerm: String?): List<User> {
-        return if (!searchTerm.isNullOrBlank()) {
-            userRepository.search(searchTerm)
-        } else {
+        return if (searchTerm.isNullOrBlank()) {
             userRepository.findAll(Sort.by("username"))
+        } else {
+            userRepository.search(searchTerm)
         }
     }
 
@@ -25,7 +25,7 @@ class DefaultUserService(
         return userRepository.findByUsername(username)
     }
 
-    override fun create(user: User): User {
+    override fun register(user: User): User {
         if (userRepository.existsByUsername(user.username)) {
             throw DuplicateUserException(user)
         }
@@ -36,7 +36,7 @@ class DefaultUserService(
     }
 
     override fun toggle(user: User): User {
-        user.active = !user.active
+        user.toggle()
         return userRepository.save(user)
     }
 }

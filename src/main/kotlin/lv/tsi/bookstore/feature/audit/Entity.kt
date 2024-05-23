@@ -25,7 +25,11 @@ enum class AuditType(val decrease: Boolean) {
     SALE(decrease = true),
     REFUND(decrease = false),
     SUPPLY(decrease = false),
-    WASTAGE(decrease = true),
+    WASTAGE(decrease = true);
+
+    fun toDisplayName(): String = name
+        .lowercase()
+        .replaceFirstChar { it.uppercaseChar() }
 }
 
 @Entity

@@ -4,7 +4,7 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Root
 import lv.tsi.bookstore.feature.book.BookRepository
-import lv.tsi.bookstore.feature.security.SecurityService
+import lv.tsi.bookstore.feature.login.SecurityService
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -39,7 +39,7 @@ class DefaultAuditService(
         )
     }
 
-    override fun save(audit: Audit) {
+    override fun create(audit: Audit) {
         // Ensure that the stock levels are sufficient for the operation.
         if (audit.type.decrease) {
             for (entry in audit.entries) {

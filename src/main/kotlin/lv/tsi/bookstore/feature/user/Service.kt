@@ -1,7 +1,7 @@
 package lv.tsi.bookstore.feature.user
 
 class DuplicateUserException(user: User) :
-    RuntimeException("User with username '${user.username}' already exists")
+    RuntimeException("User '${user.username}' already exists.")
 
 interface UserService {
 
@@ -9,7 +9,7 @@ interface UserService {
 
     fun findByUsername(username: String): User?
 
-    fun create(user: User): User
+    fun register(user: User): User
 
     fun toggle(user: User): User
 

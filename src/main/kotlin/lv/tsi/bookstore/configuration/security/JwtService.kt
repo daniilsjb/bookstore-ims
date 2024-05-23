@@ -19,24 +19,13 @@ class JwtService(
     private val expiration: Long,
 ) {
 
-    fun generateAccessToken(user: UserDetails, extraClaims: Map<String, Any> = mapOf()): String {
+    fun generateAccessToken(user: UserDetails): String {
         return Jwts.builder()
-            .claims(extraClaims)
             .subject(user.username)
             .issuedAt(Date(System.currentTimeMillis()))
             .expiration(Date(System.currentTimeMillis() + expiration))
             .signWith(generateSigningKey())
             .compact()
-    }
-
-    fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T): T {
-        val claims = Jwts.parser()
-            .verifyWith(generateSigningKey())
-            .build()
-            .parseSignedClaims(token)
-            .payload
-
-        return claimsResolver(claims)
     }
 
     private fun generateSigningKey(): SecretKey {
@@ -49,6 +38,16 @@ class JwtService(
 
     fun extractExpiration(token: String): Date {
         return extractClaim(token, Claims::getExpiration)
+    }
+
+    private fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T): T {
+        val claims = Jwts.parser()
+            .verifyWith(generateSigningKey())
+            .build()
+            .parseSignedClaims(token)
+            .payload
+
+        return claimsResolver(claims)
     }
 
     fun isTokenValid(token: String, user: UserDetails): Boolean {

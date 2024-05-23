@@ -1,4 +1,4 @@
-package lv.tsi.bookstore.feature.security
+package lv.tsi.bookstore.feature.login
 
 import com.vaadin.flow.component.html.H1
 import com.vaadin.flow.component.login.LoginForm

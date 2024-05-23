@@ -12,9 +12,10 @@ import com.vaadin.flow.component.sidenav.SideNavItem
 import com.vaadin.flow.theme.lumo.LumoUtility
 import lv.tsi.bookstore.feature.audit.AuditView
 import lv.tsi.bookstore.feature.book.BookView
-import lv.tsi.bookstore.feature.security.SecurityService
-import lv.tsi.bookstore.feature.user.isManager
+import lv.tsi.bookstore.feature.login.SecurityService
+import lv.tsi.bookstore.feature.user.Role
 import lv.tsi.bookstore.feature.user.UserView
+import lv.tsi.bookstore.feature.user.hasRole
 
 class MainLayout(
     private val securityService: SecurityService,
@@ -48,7 +49,7 @@ class MainLayout(
     init {
         val hasManagerAccess = securityService
             .getAuthenticatedUserDetails()
-            .isManager()
+            .hasRole(Role.MANAGER)
 
         addToDrawer(SideNav().apply {
             label = "Bookstore"
