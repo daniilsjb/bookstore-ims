@@ -61,7 +61,7 @@ class AuditView(
             auditService.create(audit)
             Notification.show("Audit has been added successfully!")
             form.clear()
-        } catch (e: InsufficientStock) {
+        } catch (e: InsufficientStockException) {
             Notification.show(e.message)
         }
 

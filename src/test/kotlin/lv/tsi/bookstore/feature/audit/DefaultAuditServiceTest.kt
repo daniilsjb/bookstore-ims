@@ -3,19 +3,13 @@ package lv.tsi.bookstore.feature.audit
 import lv.tsi.bookstore.feature.book.Book
 import lv.tsi.bookstore.feature.book.BookRepository
 import lv.tsi.bookstore.feature.login.SecurityService
-import lv.tsi.bookstore.feature.user.User
-import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDateTime
-import java.util.*
 import java.util.function.Supplier
 
 @ExtendWith(MockitoExtension::class)
@@ -51,6 +45,6 @@ class DefaultAuditServiceTest {
         )
 
         assertThatThrownBy { victim.create(audit) }
-            .isInstanceOf(InsufficientStock::class.java)
+            .isInstanceOf(InsufficientStockException::class.java)
     }
 }

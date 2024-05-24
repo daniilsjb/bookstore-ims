@@ -48,7 +48,7 @@ class DefaultAuditService(
                 val availableQuantity = book.quantity
                 val decreasedQuantity = entry.quantity
                 if (decreasedQuantity > availableQuantity) {
-                    throw InsufficientStock(book)
+                    throw InsufficientStockException(book)
                 }
             }
         }
