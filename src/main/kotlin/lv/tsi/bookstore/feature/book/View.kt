@@ -41,6 +41,11 @@ class BookView(
     private val securityService: SecurityService,
 ) : VerticalLayout() {
 
+    private val hasManagerAccess: Boolean
+        get() = securityService
+            .getAuthenticatedUserDetails()
+            .hasRole(Role.MANAGER)
+
     private val search = TextField().apply {
         placeholder = "Search..."
         valueChangeMode = ValueChangeMode.LAZY
@@ -77,7 +82,9 @@ class BookView(
         addColumns("basePrice")
         getColumnByKey("basePrice").setTextAlign(ColumnTextAlign.CENTER)
 
-        columns.forEach { it.setAutoWidth(true) }
+        columns.forEach { column ->
+            column.setAutoWidth(true)
+        }
     }
 
     private val form = BookForm(
@@ -85,48 +92,46 @@ class BookView(
         bookService.findAllAuthors(),
     ).apply {
         width = "25em"
-
-        addSaveListener { event ->
-            val book = event.book
-            try {
-                when (mode) {
-                    Mode.ADD -> bookService.create(book)
-                    Mode.EDIT -> bookService.update(book)
-                }
-
-                refreshGrid()
-                closeForm()
-
-                Notification.show("Book '${book.title}' has been added successfully!")
-            } catch (e: DuplicateBookException) {
-                setIdentifierError("This ISBN is already taken")
+        addCloseListener { closeForm() }
+        addDeleteListener { onDelete(it.book) }
+        addSaveListener {
+            when (mode) {
+                Mode.ADD -> onSave(it.book)
+                Mode.EDIT -> onUpdate(it.book)
             }
-        }
-
-        addDeleteListener { event ->
-            val book = event.book
-            try {
-                bookService.delete(book)
-
-                refreshGrid()
-                closeForm()
-
-                Notification.show("Book '${book.title}' removed successfully!")
-            } catch (e: ReferencedBookException) {
-                Notification.show("Book '${book.title}' cannot be removed.")
-            }
-        }
-
-        addCloseListener {
-            closeForm()
         }
     }
 
+    private fun onSave(book: Book) {
+        try {
+            bookService.create(book)
+            Notification.show("Book '${book.title}' has been added successfully!")
+        } catch (e: DuplicateBookException) {
+            form.isbn.isInvalid = true
+            form.isbn.errorMessage = "This ISBN is already taken"
+            return
+        }
 
-    private val hasManagerAccess: Boolean
-        get() = securityService
-            .getAuthenticatedUserDetails()
-            .hasRole(Role.MANAGER)
+        refreshGrid()
+        closeForm()
+    }
+
+    private fun onUpdate(book: Book) {
+        bookService.update(book)
+    }
+
+    private fun onDelete(book: Book) {
+        try {
+            bookService.delete(book)
+            Notification.show("Book '${book.title}' removed successfully!")
+        } catch (e: ReferencedBookException) {
+            Notification.show(e.message)
+            return
+        }
+
+        refreshGrid()
+        closeForm()
+    }
 
     init {
         setSizeFull()
@@ -196,26 +201,26 @@ private class BookForm(
             delete.isVisible = value == Mode.EDIT
         }
 
-    private val isbn = TextField("ISBN")
-    private val title = TextField("Title")
-    private val basePrice = BigDecimalField("Base Price")
+    val isbn = TextField("ISBN")
+    val title = TextField("Title")
+    val basePrice = BigDecimalField("Base Price")
 
-    private val authors = MultiSelectComboBox<Author>("Author").apply {
+    val authors = MultiSelectComboBox<Author>("Author").apply {
         setItems(authors)
         setItemLabelGenerator { it.name }
     }
 
-    private val publisher = ComboBox<Publisher>("Publisher").apply {
+    val publisher = ComboBox<Publisher>("Publisher").apply {
         setItems(publishers)
         setItemLabelGenerator { it.name }
     }
 
-    private val quantity = IntegerField("Quantity").apply {
+    val quantity = IntegerField("Quantity").apply {
         helperText = "This value can only be updated via auditing."
         isEnabled = false
     }
 
-    private val save = Button("Save").apply {
+    val save = Button("Save").apply {
         addThemeVariants(ButtonVariant.LUMO_PRIMARY)
         addClickShortcut(Key.ENTER)
         addClickListener {
@@ -225,7 +230,7 @@ private class BookForm(
         }
     }
 
-    private val delete = Button(Icon(VaadinIcon.TRASH)).apply {
+    val delete = Button(Icon(VaadinIcon.TRASH)).apply {
         addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR)
         addClickListener {
             ConfirmDialog().apply {
@@ -241,7 +246,7 @@ private class BookForm(
         }
     }
 
-    private val close = Button("Close").apply {
+    val close = Button("Close").apply {
         addClickShortcut(Key.ESCAPE)
         addClickListener {
             fireEvent(CloseEvent(this@BookForm))
@@ -262,11 +267,6 @@ private class BookForm(
 
         add(this.isbn, this.title, this.authors, this.publisher, this.basePrice, this.quantity)
         add(fullLayout)
-    }
-
-    fun setIdentifierError(message: String) {
-        isbn.isInvalid = true
-        isbn.errorMessage = message
     }
 
     fun setBook(book: Book?) {

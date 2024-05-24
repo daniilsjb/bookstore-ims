@@ -47,7 +47,10 @@ INSERT INTO book(isbn, title, base_price, publisher_id, quantity) VALUES
 ('0-312-87307-7',     'Knife of Dreams',        9.99, 3, 0),
 ('0-7653-0230-6',     'The Gathering Storm',    9.99, 3, 0),
 ('978-0-7653-2594-5', 'Towers of Midnight',     9.99, 3, 0),
-('978-0-7653-2595-2', 'A Memory of Light',      9.99, 3, 0);
+('978-0-7653-2595-2', 'A Memory of Light',      9.99, 3, 0),
+('0-8099-0003-3',     'The Dragonbone Chair',   9.99, 4, 0),
+('0-88677-435-7',     'The Stone of Farewell',  9.99, 4, 0),
+('0-88677-521-3',     'To Green Angel Tower',   9.99, 4, 0);
 
 INSERT INTO authorship(author_id, book_isbn) VALUES
 (1, '0-312-85009-3'),
@@ -67,4 +70,7 @@ INSERT INTO authorship(author_id, book_isbn) VALUES
 (1, '978-0-7653-2595-2'),
 (3, '0-7653-0230-6'),
 (3, '978-0-7653-2594-5'),
-(3, '978-0-7653-2595-2');
+(3, '978-0-7653-2595-2'),
+(8, '0-8099-0003-3'),
+(8, '0-88677-435-7'),
+(8, '0-88677-521-3');

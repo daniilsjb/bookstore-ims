@@ -9,6 +9,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.Sort
 import java.util.*
 
@@ -146,5 +147,37 @@ class DefaultBookServiceTest {
             .isInstanceOf(DuplicateBookException::class.java)
 
         verify(bookRepository).existsById(entity.isbn)
+    }
+
+    @Test
+    fun `should successfully update an existing book`() {
+        val entity = Book(
+            isbn = "0-312-85009-3",
+            title = "The Eye of the World",
+        )
+
+        `when`(bookRepository.save(entity)).thenReturn(entity)
+
+        val result = victim.update(entity)
+
+        assertThat(result).isEqualTo(entity)
+
+        verify(bookRepository).save(entity)
+    }
+
+    @Test
+    fun `should throw an exception when deleting a referenced book`() {
+        val entity = Book(
+            isbn = "0-312-85009-3",
+            title = "The Eye of the World",
+        )
+
+        `when`(bookRepository.delete(entity))
+            .thenThrow(DataIntegrityViolationException("Referenced"))
+
+        assertThatThrownBy { victim.delete(entity) }
+            .isInstanceOf(ReferencedBookException::class.java)
+
+        verify(bookRepository).delete(entity)
     }
 }
