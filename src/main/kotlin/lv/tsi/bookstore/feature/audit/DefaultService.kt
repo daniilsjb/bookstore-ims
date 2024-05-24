@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.CriteriaBuilder
 import jakarta.persistence.criteria.CriteriaQuery
 import jakarta.persistence.criteria.Root
 import lv.tsi.bookstore.feature.book.BookRepository
+import lv.tsi.bookstore.feature.book.NoSuchBookException
 import lv.tsi.bookstore.feature.login.SecurityService
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
@@ -84,5 +85,19 @@ class DefaultAuditService(
 
             bookRepository.save(book)
         }
+    }
+
+    override fun create(request: AuditRequest) {
+        val audit = Audit(type = request.type)
+        val entries = request.entries.map { entry ->
+            val book = bookRepository
+                .findById(entry.isbn)
+                .orElseThrow { NoSuchBookException(entry.isbn) }
+
+            AuditEntry(book = book, quantity = entry.quantity)
+        }
+
+        audit.entries.addAll(entries)
+        create(audit)
     }
 }

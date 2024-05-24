@@ -17,4 +17,6 @@ interface AuditService {
 
     fun create(audit: Audit)
 
+    fun create(request: AuditRequest)
+
 }

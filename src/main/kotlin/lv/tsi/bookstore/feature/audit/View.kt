@@ -32,15 +32,6 @@ import lv.tsi.bookstore.feature.user.User
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-private data class AuditRowData(
-    val id: Long,
-    val book: Book,
-    val quantity: Int,
-    val type: AuditType,
-    val createdOn: LocalDateTime,
-    val createdBy: User?,
-)
-
 @PermitAll
 @Route("audit", layout = MainLayout::class)
 @PageTitle("Audit | Bookstore IMS")
@@ -60,20 +51,22 @@ class AuditView(
     }
 
     private val form = AuditForm(bookService.findAll()).apply {
-        width = "50em"
         addCloseListener { closeForm() }
-        addSaveListener { event ->
-            try {
-                auditService.create(event.audit)
-                Notification.show("Audit has been added successfully!").also {
-                    refreshGrid()
-                    closeForm()
-                    clear()
-                }
-            } catch (e: InsufficientStock) {
-                Notification.show(e.message)
-            }
+        addSaveListener { onSave(it.audit) }
+        width = "50em"
+    }
+
+    private fun onSave(audit: Audit) {
+        try {
+            auditService.create(audit)
+            Notification.show("Audit has been added successfully!")
+            form.clear()
+        } catch (e: InsufficientStock) {
+            Notification.show(e.message)
         }
+
+        refreshGrid()
+        closeForm()
     }
 
     private val grid = Grid(AuditRowData::class.java).apply {
@@ -105,7 +98,7 @@ class AuditView(
             .setHeader("Title")
 
         addColumn("quantity").apply {
-            setTextAlign(ColumnTextAlign.CENTER)
+            textAlign = ColumnTextAlign.CENTER
             setRenderer(ComponentRenderer { it ->
                 val sign = if (it.type.decrease) "-" else "+"
                 val theme = if (it.type.decrease) "error" else "success"
@@ -119,7 +112,9 @@ class AuditView(
             .setSortable(true)
             .setHeader("Created By")
 
-        columns.forEach { it.setAutoWidth(true) }
+        columns.forEach { column ->
+            column.setAutoWidth(true)
+        }
     }
 
     init {
@@ -130,9 +125,10 @@ class AuditView(
             grid.asSingleSelect().clear()
             openForm()
         }
+
         add(FlexLayout(button, typePicker, datePicker).apply {
             setWidthFull()
-            setFlexWrap(FlexLayout.FlexWrap.WRAP)
+            flexWrap = FlexLayout.FlexWrap.WRAP
             addClassName(LumoUtility.Gap.MEDIUM)
         })
 
@@ -301,3 +297,12 @@ private class SaveEvent(
 private class CloseEvent(
     source: AuditForm,
 ) : ComponentEvent<AuditForm>(source, false)
+
+data class AuditRowData(
+    var id: Long,
+    var book: Book,
+    var quantity: Int,
+    var type: AuditType,
+    var createdOn: LocalDateTime,
+    var createdBy: User?,
+)

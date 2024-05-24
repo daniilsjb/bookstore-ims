@@ -3,6 +3,8 @@ package lv.tsi.bookstore.feature.auth
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -25,7 +27,9 @@ data class AuthenticationResponse(
 
 @RestController
 @RequestMapping("/api/v1/auth")
-class AuthenticationController(private val service: AuthenticationService) {
+class AuthenticationController(
+    private val service: AuthenticationService
+) {
 
     @PostMapping("/authenticate")
     fun authenticate(@RequestBody @Valid request: AuthenticationRequest): AuthenticationResponse {

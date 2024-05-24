@@ -4,8 +4,6 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.Size
-import lv.tsi.bookstore.feature.book.BookService
-import lv.tsi.bookstore.feature.book.NoSuchBookException
 import org.hibernate.validator.constraints.ISBN
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -34,18 +32,10 @@ data class AuditRequestEntry(
 @RequestMapping("/api/v1/audits")
 class AuditController(
     private val auditService: AuditService,
-    private val bookService: BookService,
 ) {
 
     @PostMapping
     fun create(@RequestBody @Valid request: AuditRequest) {
-        val audit = Audit(type = request.type)
-        val entries = request.entries.map { entry ->
-            val book = bookService.findByISBN(entry.isbn) ?: throw NoSuchBookException(entry.isbn)
-            AuditEntry(book = book, quantity = entry.quantity)
-        }
-
-        audit.entries.addAll(entries)
-        auditService.create(audit)
+        auditService.create(request)
     }
 }
