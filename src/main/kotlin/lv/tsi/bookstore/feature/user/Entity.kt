@@ -77,7 +77,7 @@ class User(
     override fun isCredentialsNonExpired(): Boolean = true
     override fun isAccountNonExpired(): Boolean = true
     override fun isAccountNonLocked(): Boolean = active
-    override fun isEnabled(): Boolean = true
+    override fun isEnabled(): Boolean = active
 }
 
 fun UserDetails.hasRole(role: Role): Boolean =
