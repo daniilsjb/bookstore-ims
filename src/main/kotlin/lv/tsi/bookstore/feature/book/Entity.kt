@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.PositiveOrZero
+import jakarta.validation.constraints.Size
 import org.hibernate.validator.constraints.ISBN
 import java.math.BigDecimal
 
@@ -47,6 +48,7 @@ class Book(
 
     @field:Column(nullable = false)
     @field:NotBlank(message = "Title must not be blank")
+    @field:Size(max = 255, message = "Title cannot be longer than 255 characters")
     var title: String = "",
 
     @field:Column(nullable = false)

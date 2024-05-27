@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.hibernate.validator.constraints.Length
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -34,6 +35,7 @@ class User(
 
     @field:Column(nullable = false, unique = true)
     @field:NotBlank(message = "Username must not be blank")
+    @field:Size(max = 255, message = "Username cannot be longer than 255 characters")
     private var username: String = "",
 
     @field:Column(nullable = false, length = 60)

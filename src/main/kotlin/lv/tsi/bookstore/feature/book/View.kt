@@ -118,6 +118,8 @@ class BookView(
 
     private fun onUpdate(book: Book) {
         bookService.update(book)
+        refreshGrid()
+        closeForm()
     }
 
     private fun onDelete(book: Book) {
